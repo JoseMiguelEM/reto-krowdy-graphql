@@ -1,5 +1,25 @@
-import { Resolver, Query, Mutation, Arg } from 'type-graphql';
-import { Task, CreateTaskInput, UpdateTaskInput, TaskStatus } from './Task';
+import { Resolver, Query, Mutation, Arg, InputType, Field } from 'type-graphql';
+import { Task, CreateTaskInput, UpdateTaskInput, TaskStatus, Priority } from './Task';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
+
+@InputType()
+export class TaskFilterInput {
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  searchTerm?: string;
+
+  @Field(() => TaskStatus, { nullable: true })
+  @IsOptional()
+  @IsEnum(TaskStatus)
+  status?: TaskStatus;
+
+  @Field(() => Priority, { nullable: true })
+  @IsOptional()
+  @IsEnum(Priority)
+  priority?: Priority;
+}
+
 
 @Resolver(of => Task)
 export class TaskResolver {
@@ -7,19 +27,30 @@ export class TaskResolver {
 
   @Query(returns => [Task], { name: 'tasks' })
   async getAllTasks(
-    @Arg('searchTerm', { nullable: true }) searchTerm?: string,
-    @Arg('status', { nullable: true }) status?: TaskStatus
+    @Arg('filters', { nullable: true }) filters?: TaskFilterInput
   ): Promise<Task[]> {
     return this.tasks.filter(task => {
       if (!task.active) return false;
       
-      const matchesSearch = !searchTerm || 
-        task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.description?.toLowerCase().includes(searchTerm.toLowerCase());
-        
+      // Si no hay filtros, devolver todas las tareas activas
+      if (!filters) return true;
+      
+      const { searchTerm, status, priority } = filters;
+      
+      // Búsqueda por término en título y descripción
+      const matchesSearch = !searchTerm || (
+        (task.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.description?.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+      
+      // Filtro por status
       const matchesStatus = !status || task.status === status;
       
-      return matchesSearch && matchesStatus;
+      // Filtro por priority
+      const matchesPriority = !priority || task.priority === priority;
+      
+      // La tarea debe cumplir con todos los filtros aplicados
+      return matchesSearch && matchesStatus && matchesPriority;
     });
   }
 
