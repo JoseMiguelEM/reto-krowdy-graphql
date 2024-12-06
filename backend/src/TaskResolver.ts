@@ -105,4 +105,13 @@ export class TaskResolver {
     
     return true;
   }
+  @Query(returns => [String], { description: 'Obtener todos los estados posibles de una tarea' })
+  async getAllTaskStatuses(): Promise<string[]> {
+    return Object.values(TaskStatus);
+  }
+
+  @Query(returns => [String], { description: 'Obtener todas las prioridades posibles de una tarea' })
+  async getAllPriorities(): Promise<string[]> {
+    return Object.values(Priority);
+  }
 }
