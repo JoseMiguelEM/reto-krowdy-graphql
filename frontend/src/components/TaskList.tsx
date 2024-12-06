@@ -10,7 +10,7 @@ import {
  Query,
  QueryTasksArgs
 } from '@/gql/types';
-import { TASKS_QUERY } from   '@/graphql/queries';
+import { TASKS_QUERY } from '@/graphql/queries';
 import {
  Table,
  TableBody,
@@ -30,6 +30,9 @@ import {
  Button
 } from "@mui/material";
 import { CreateTaskDialog } from './CreateTaskDialog';
+import { EditTaskDialog } from './EditTaskDialog';
+import { DeleteTaskDialog } from './DeleteTaskDialog';
+import ViewTaskDialog from './ViewTaskDialog';
 
 const DEBOUNCE_DELAY = 2000;
 
@@ -39,6 +42,10 @@ export const TaskList = () => {
  const [status, setStatus] = useState<TaskStatus | ''>('');
  const [priority, setPriority] = useState<Priority | ''>('');
  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+ const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+ const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+ const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+ const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
  const inputRef = useRef<HTMLInputElement>(null);
  
  const { data, loading, error } = useQuery<Query, QueryTasksArgs>(TASKS_QUERY, {
@@ -192,7 +199,36 @@ export const TaskList = () => {
                   task.priority === Priority.Low ? 'Baja' : ''}
                </TableCell>
                <TableCell align="right">
-                 {/* Aquí irán los botones de acciones */}
+                 <Box className="space-x-2">
+                   <Button
+                     size="small"
+                     onClick={() => {
+                       setSelectedTask(task);
+                       setIsViewDialogOpen(true);
+                     }}
+                   >
+                     Ver
+                   </Button>
+                   <Button
+                     size="small"
+                     onClick={() => {
+                       setSelectedTask(task);
+                       setIsEditDialogOpen(true);
+                     }}
+                   >
+                     Editar
+                   </Button>
+                   <Button
+                     size="small"
+                     color="error"
+                     onClick={() => {
+                       setSelectedTask(task);
+                       setIsDeleteDialogOpen(true);
+                     }}
+                   >
+                     Eliminar
+                   </Button>
+                 </Box>
                </TableCell>
              </TableRow>
            ))}
@@ -203,6 +239,34 @@ export const TaskList = () => {
      <CreateTaskDialog
        open={isCreateDialogOpen}
        onClose={() => setIsCreateDialogOpen(false)}
+     />
+
+     <ViewTaskDialog
+       open={isViewDialogOpen}
+       onClose={() => {
+         setIsViewDialogOpen(false);
+         setSelectedTask(null);
+       }}
+       task={selectedTask}
+     />
+
+     <EditTaskDialog
+       open={isEditDialogOpen}
+       onClose={() => {
+         setIsEditDialogOpen(false);
+         setSelectedTask(null);
+       }}
+       task={selectedTask}
+     />
+
+     <DeleteTaskDialog
+       open={isDeleteDialogOpen}
+       onClose={() => {
+         setIsDeleteDialogOpen(false);
+         setSelectedTask(null);
+       }}
+       taskId={selectedTask?.id || null}
+       taskTitle={selectedTask?.title || ''}
      />
    </div>
  );
