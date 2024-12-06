@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "codegen": "graphql-codegen",
+    "codegen:watch": "graphql-codegen -w",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -12,10 +14,6 @@
     "@apollo/client": "^3.12.2",
     "@emotion/react": "^11.13.5",
     "@emotion/styled": "^11.13.5",
-    "@graphql-codegen/cli": "^5.0.3",
-    "@graphql-codegen/typescript": "^4.1.2",
-    "@graphql-codegen/typescript-operations": "^4.4.0",
-    "@graphql-codegen/typescript-react-apollo": "^4.3.2",
     "@mui/icons-material": "^6.1.10",
     "@mui/material": "^6.1.10",
     "@radix-ui/react-dialog": "^1.1.2",
@@ -33,6 +31,10 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.3",
+    "@graphql-codegen/typescript": "^4.1.2",
+    "@graphql-codegen/typescript-operations": "^4.4.0",
+    "@graphql-codegen/typescript-react-apollo": "^4.3.2",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
