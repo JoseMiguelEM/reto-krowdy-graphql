@@ -5,8 +5,8 @@ import { Task, CreateTaskInput, UpdateTaskInput, TaskStatus } from './Task';
 export class TaskResolver {
   private tasks: Task[] = [];
 
-  @Query(returns => [Task])
-  async getTasks(
+  @Query(returns => [Task], { name: 'tasks' })
+  async getAllTasks(
     @Arg('searchTerm', { nullable: true }) searchTerm?: string,
     @Arg('status', { nullable: true }) status?: TaskStatus
   ): Promise<Task[]> {
