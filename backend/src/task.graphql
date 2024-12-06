@@ -1,0 +1,55 @@
+// src/graphql/task.graphql
+
+import { Resolver, Query, Mutation, Arg, ID } from 'type-graphql';
+import { Task, CreateTaskInput, UpdateTaskInput, TaskStatus } from '../models/Task';
+
+@Resolver(Task)
+export class TaskResolver {
+  // Queries
+  @Query(() => [Task])
+  async tasks(): Promise<Task[]> {
+    // Implementación pendiente
+    return [];
+  }
+
+  @Query(() => Task, { nullable: true })
+  async task(@Arg('id', () => ID) id: string): Promise<Task | null> {
+    // Implementación pendiente
+    return null;
+  }
+
+  @Query(() => [Task])
+  async activeTasksWithFilter(
+    @Arg('searchTerm', { nullable: true }) searchTerm?: string,
+    @Arg('status', () => TaskStatus, { nullable: true }) status?: TaskStatus
+  ): Promise<Task[]> {
+    // Implementación pendiente - Este query manejará el filtrado
+    return [];
+  }
+
+  // Mutations
+  @Mutation(() => Task)
+  async createTask(
+    @Arg('input') input: CreateTaskInput
+  ): Promise<Task> {
+    // Implementación pendiente
+    return {} as Task;
+  }
+
+  @Mutation(() => Task)
+  async updateTask(
+    @Arg('id', () => ID) id: string,
+    @Arg('input') input: UpdateTaskInput
+  ): Promise<Task> {
+    // Implementación pendiente
+    return {} as Task;
+  }
+
+  @Mutation(() => Boolean)
+  async deleteTask(
+    @Arg('id', () => ID) id: string
+  ): Promise<boolean> {
+    // Implementación pendiente - Realizará borrado lógico
+    return true;
+  }
+}
