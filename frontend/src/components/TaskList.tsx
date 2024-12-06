@@ -1,8 +1,16 @@
-// src/components/TaskList.tsx
 'use client';
 
-import { useState } from 'react';
-import { gql,useQuery } from "@apollo/client";
+import { useState, useEffect, useRef } from 'react';
+import { useQuery } from '@apollo/client';
+import {
+  Task,
+  TaskStatus,
+  Priority,
+  TaskFilterInput,
+  Query,
+  QueryTasksArgs
+} from '@/gql/types';
+import { TASKS_QUERY } from '@/graphql/queries';
 import {
   Table,
   TableBody,
@@ -15,33 +23,38 @@ import {
   Alert,
   TextField,
 } from "@mui/material";
-const GET_TASKS = gql`
-  query GetTasks($filters: TaskFilterInput) {
-    tasks(filters: $filters) {
-      id
-      title
-      description
-      status
-      priority
-      active
-      createdAt
-      updatedAt
-    }
-  }
-`;
+
+const DEBOUNCE_DELAY = 2000;
+
 export const TaskList = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
+  const inputRef = useRef<HTMLInputElement>(null);
   
-  const { data, loading, error } = useQuery(GET_TASKS, {
+  const { data, loading, error } = useQuery<Query, QueryTasksArgs>(TASKS_QUERY, {
     variables: {
       filters: {
-        searchTerm: searchTerm || undefined
-      }
+        searchTerm: debouncedSearchTerm || undefined,
+      } as TaskFilterInput
     }
   });
 
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, DEBOUNCE_DELAY);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
   const _handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
+  };
+
+  const _handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      setDebouncedSearchTerm(searchTerm);
+    }
   };
 
   if (loading) {
@@ -60,6 +73,8 @@ export const TaskList = () => {
     );
   }
 
+  const tasks = data?.tasks || [];
+
   return (
     <div className="space-y-4">
       <TextField
@@ -69,7 +84,13 @@ export const TaskList = () => {
         size="small"
         value={searchTerm}
         onChange={_handleSearchChange}
+        onKeyPress={_handleKeyPress}
+        placeholder="Buscar por título o descripción"
         className="mb-4"
+        inputRef={inputRef}
+        inputProps={{
+          autoComplete: 'off'
+        }}
       />
 
       <TableContainer component={Paper}>
@@ -84,7 +105,7 @@ export const TaskList = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data?.tasks.map((task:any) => (
+            {tasks.map((task: Task) => (
               <TableRow key={task.id}>
                 <TableCell>{task.title}</TableCell>
                 <TableCell>{task.description}</TableCell>
